@@ -14,6 +14,7 @@ import com.sms.auth.security.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -92,7 +93,15 @@ public class AuthService {
     /* ================= REGISTER STAFF ================= */
 
     @Transactional
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> registerStaff(RegisterStaffRequest req, User loggedInUser) {
+
+        if (loggedInUser == null) {
+            return ResponseEntity.status(401).body(Map.of(
+                    "success", false,
+                    "message", "You are not logged in! Please log in to get access."
+            ));
+        }
 
         UUID schoolId;
         if (loggedInUser.getRole() == UserRole.SCHOOL_ADMIN) {
