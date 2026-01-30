@@ -1,0 +1,60 @@
+package com.sms.auth.entity;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import org.hibernate.annotations.*;
+import org.hibernate.type.SqlTypes;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name = "parents")
+@Getter
+@Setter
+@SQLDelete(sql = "UPDATE parents SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
+public class Parent {
+
+    /* ================= PRIMARY KEY ================= */
+
+    @Id
+    @GeneratedValue
+    @UuidGenerator(style = UuidGenerator.Style.RANDOM)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(length = 36, updatable = false, nullable = false)
+    private UUID id;
+
+    /* ================= RELATIONSHIPS ================= */
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "school_id", nullable = false)
+    private School school;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    /* ================= BUSINESS FIELDS ================= */
+
+    @Column(name = "guardian_name", nullable = false)
+    private String guardianName;
+
+    private String occupation;
+
+    /* ================= TIMESTAMPS ================= */
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    /* ================= SOFT DELETE ================= */
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+}
